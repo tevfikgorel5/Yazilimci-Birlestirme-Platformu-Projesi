@@ -1,5 +1,6 @@
 Yazılımcı Birleştirme Platformu Projesi
 PROJE ÜYELERİ:
+
 Tevfik Görel 25100011407
 
 Mert Sefa Taş 25100011416
