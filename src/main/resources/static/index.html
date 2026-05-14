@@ -5,78 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevSözlük | Yazılımcı Birleştirme Platformu</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .baslik-kapsayici { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; margin-bottom: 20px; }
-        h1 { color: #1a73e8; margin: 0; cursor: pointer; }
-        #kullanici-paneli { display: none; text-align: right; }
-        .kullanici-adi-text { font-weight: bold; color: #495057; margin-right: 15px; }
-        .btn-cikis { background-color: #dc3545; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
-        .bolum { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef; }
-        .bolum h3 { margin-top: 0; color: #495057; }
-        input[type="text"], input[type="password"], textarea { width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; }
-        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; width: 100%; margin-bottom: 5px; }
-        .btn-kayit { background-color: #28a745; color: white; }
-        .btn-giris { background-color: #007bff; color: white; }
-        .btn-olustur { background-color: #17a2b8; color: white; }
-        .btn-geri { background-color: #6c757d; color: white; width: auto; margin-bottom: 15px; }
-        .btn-sil { background-color: #dc3545; color: white; width: auto; padding: 5px 10px; font-size: 0.85em; float: right; margin-left: 10px; }
-        .btn-sayfa { background-color: #6c757d; color: white; width: auto; padding: 5px 15px; border-radius: 20px; }
-        #baslik-listesi { list-style-type: none; padding: 0; }
-        #baslik-listesi li { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 5px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .baslik-linki { cursor: pointer; color: #1a73e8; font-weight: bold; font-size: 1.1em; }
-        .baslik-linki:hover { text-decoration: underline; }
-        .tarih { font-size: 0.85em; color: #6c757d; }
-        #mesaj-kutusu { text-align: center; font-weight: bold; margin-top: 10px; color: #d9534f; }
-        .entry-kutu { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #e9ecef; }
-        .entry-yazar { text-align: right; font-size: 0.85em; color: #6c757d; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 5px;}
-        .baslik-ust { display: flex; justify-content: space-between; align-items: center; }
-        #sayfalama-alani { display: flex; justify-content: center; align-items: center; margin-top: 20px; gap: 15px; }
+        /* Modern Reset ve Değişkenler (Açık Tema) */
+        :root { --primary: #2563eb; --primary-hover: #1d4ed8; --danger: #ef4444; --danger-hover: #b91c1c; --dark: #1e293b; --light: #f8fafc; --gray: #64748b; --border: #e2e8f0; --bg: #f1f5f9; --card-bg: #ffffff; --text: #334155; }
+        
+        /* Gece Modu Değişkenleri (Dark Mode) */
+        body.dark-mode { --primary: #3b82f6; --primary-hover: #60a5fa; --danger: #ef4444; --danger-hover: #f87171; --dark: #f8fafc; --light: #1e293b; --gray: #94a3b8; --border: #334155; --bg: #0f172a; --card-bg: #1e293b; --text: #cbd5e1; }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.6; transition: background-color 0.3s, color 0.3s; }
+        
+        /* Üst Menü (Navbar) */
+        .navbar { background-color: #0f172a; color: white; padding: 15px 0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); position: sticky; top: 0; z-index: 100; }
+        .nav-container { max-width: 1000px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { font-size: 1.5em; font-weight: 800; color: white; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-logo span { color: #38bdf8; }
+        #kullanici-paneli { display: none; align-items: center; gap: 15px; }
+        .kullanici-adi-text { font-weight: 500; font-size: 0.95em; color: #cbd5e1; }
+        #theme-toggle { background: transparent; border: none; font-size: 1.4em; cursor: pointer; padding: 5px; transition: 0.3s; }
+        #theme-toggle:hover { transform: scale(1.1); }
+        
+        /* Ana İçerik Alanı & Kartlar */
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .bolum { background: var(--card-bg); padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border); transition: 0.3s; }
+        .bolum h3 { margin-top: 0; color: var(--dark); font-size: 1.2em; border-bottom: 2px solid var(--light); padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* Form Elemanları */
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1em; box-sizing: border-box; transition: 0.2s; background-color: var(--light); color: var(--text); }
+        input:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background-color: var(--card-bg); }
+        
+        /* Butonlar */
+        button { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary { background-color: var(--primary); color: white; width: 100%; margin-bottom: 10px; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-outline { background-color: transparent; border: 2px solid var(--primary); color: var(--primary); width: 100%; margin-bottom: 10px; }
+        .btn-outline:hover { background-color: var(--light); }
+        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.85em; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+        .btn-sayfa { background-color: var(--card-bg); border: 1px solid var(--border); color: var(--dark); padding: 8px 16px; border-radius: 6px; }
+        .btn-sayfa:hover { background-color: var(--light); border-color: var(--gray); }
+        
+        /* Başlık Listesi */
+        #baslik-listesi { list-style-type: none; padding: 0; margin: 0; }
+        #baslik-listesi li { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        #baslik-listesi li:last-child { border-bottom: none; }
+        .baslik-linki { cursor: pointer; color: var(--dark); font-weight: 600; font-size: 1.1em; text-decoration: none; transition: color 0.2s; }
+        .baslik-linki:hover { color: var(--primary); }
+        .tarih { font-size: 0.85em; color: var(--gray); background: var(--light); padding: 4px 8px; border-radius: 4px; }
+        
+        /* Entry (Cevap) Kutuları */
+        .baslik-ust { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        #secili-baslik-adi { font-size: 1.8em; color: var(--dark); margin: 0; font-weight: 800; }
+        .entry-kutu { padding: 20px 0; border-bottom: 1px solid var(--border); }
+        .entry-kutu:last-child { border-bottom: none; }
+        .entry-metin { font-size: 1.05em; color: var(--text); white-space: pre-wrap; margin-bottom: 15px; }
+        .entry-alt-bilgi { display: flex; justify-content: flex-end; align-items: center; gap: 15px; font-size: 0.85em; color: var(--gray); }
+        .yazar-badge { color: var(--primary); font-weight: 600; }
+        
+        /* Markdown Toolbar & Formatlar */
+        .md-toolbar { display: flex; gap: 5px; margin-bottom: -5px; padding: 8px; background: var(--light); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; }
+        .md-btn { padding: 5px 12px; background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--dark); font-weight: bold; cursor: pointer; }
+        .md-btn:hover { background: var(--border); }
+        #yeniCevapMetni { border-top-left-radius: 0; border-top-right-radius: 0; }
+        pre, code { background: var(--light); padding: 3px 6px; border-radius: 4px; font-family: monospace; border: 1px solid var(--border); }
+        pre { padding: 15px; overflow-x: auto; display: block; white-space: pre; }
+        
+        /* Skeleton Yükleyiciler (Animasyonlu) */
+        .skeleton { animation: pulse 1.5s infinite; background: linear-gradient(90deg, var(--light) 25%, var(--border) 50%, var(--light) 75%); background-size: 200% 100%; border-radius: 6px; }
+        @keyframes pulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skel-text { height: 15px; margin-bottom: 10px; width: 100%; }
+        .skel-title { height: 25px; width: 70%; margin-bottom: 15px; border: none !important; }
+
+        /* Yardımcı Sınıflar */
+        #mesaj-kutusu { text-align: center; font-weight: 600; margin-top: 15px; }
+        #sayfalama-alani { display: flex; justify-content: center; align-items: center; margin-top: 30px; gap: 15px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .geri-link { color: var(--gray); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 20px; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .geri-link:hover { color: var(--dark); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="baslik-kapsayici">
-        <h1 onclick="anaSayfayaDon()">DevSözlük</h1>
-        <div id="kullanici-paneli">
-            <span class="kullanici-adi-text" id="aktif-kullanici-adi"></span>
-            <button class="btn-cikis" onclick="cikisYap()">Çıkış Yap</button>
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-logo" onclick="anaSayfayaDon()">
+            &lt;/&gt; Dev<span>Sözlük</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <button id="theme-toggle" onclick="toggleTheme()" title="Gece/Gündüz Modu">🌙</button>
+            <div id="kullanici-paneli">
+                <span class="kullanici-adi-text" id="aktif-kullanici-adi"></span>
+                <button class="btn-danger" onclick="cikisYap()">Çıkış Yap</button>
+            </div>
         </div>
     </div>
+</nav>
 
-    <div class="bolum" id="auth-bolumu">
-        <h3>Kayıt Ol / Giriş Yap</h3>
+<div class="container">
+    <div class="bolum" id="auth-bolumu" style="max-width: 400px; margin: 0 auto;">
+        <h3 style="text-align: center; border: none;">Kayıt Ol / Giriş Yap</h3>
         <input type="text" id="kullaniciAdi" placeholder="Kullanıcı Adı">
         <input type="password" id="sifre" placeholder="Şifre">
-        <button class="btn-kayit" onclick="kayitOl()">Kayıt Ol</button>
-        <button class="btn-giris" onclick="girisYap()">Giriş Yap</button>
+        <button class="btn-primary" onclick="girisYap()">Giriş Yap</button>
+        <button class="btn-outline" onclick="kayitOl()">Yeni Kayıt Ol</button>
         <div id="mesaj-kutusu"></div>
     </div>
 
     <div class="bolum" id="baslik-acma-bolumu" style="display: none;">
-        <h3>Yeni Başlık Aç</h3>
-        <input type="text" id="yeniBaslikAd" placeholder="Hangi konuyu tartışmak istiyorsun?">
-        <button class="btn-olustur" onclick="baslikAc()">Başlık Oluştur</button>
+        <h3>Yeni Konu Başlat</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="yeniBaslikAd" placeholder="Hangi teknolojiyi veya sorunu tartışmak istiyorsun?" style="margin-bottom: 0;">
+            <button class="btn-primary" style="width: auto; margin-bottom: 0;" onclick="baslikAc()">Oluştur</button>
+        </div>
     </div>
 
     <div class="bolum" id="baslik-listeleme-bolumu">
-        <h3>Güncel Başlıklar</h3>
-        <input type="text" id="aramaKelimesi" placeholder="Başlıklarda ara..." onkeyup="basliklariGetir()">
+        <input type="text" id="aramaKelimesi" placeholder="🔍 Başlıklarda ara..." onkeyup="basliklariGetir()">
         <ul id="baslik-listesi"></ul>
     </div>
 
     <div class="bolum" id="baslik-detay-bolumu" style="display: none;">
-        <button class="btn-geri" onclick="anaSayfayaDon()">⬅ Geri Dön</button>
+        <div class="geri-link" onclick="anaSayfayaDon()">← Ana Sayfaya Dön</div>
+        
         <div class="baslik-ust">
-            <h2 id="secili-baslik-adi" style="color: #1a73e8; margin-top:0;"></h2>
-            <button id="btn-baslik-sil" class="btn-sil" style="display: none;" onclick="baslikSil()">🗑 Başlığı Sil</button>
+            <h2 id="secili-baslik-adi"></h2>
+            <button id="btn-baslik-sil" class="btn-danger" style="display: none;" onclick="baslikSil()">🗑 Başlığı Sil</button>
         </div>
+        
         <ul id="cevap-listesi" style="list-style-type: none; padding: 0;"></ul>
         <div id="sayfalama-alani"></div>
-        <div id="entry-yazma-alani" style="display: none; margin-top: 20px;">
-            <textarea id="yeniCevapMetni" rows="4" placeholder="Bu başlığa entry gir..."></textarea>
-            <button class="btn-olustur" onclick="cevapYaz()">Entry Gönder</button>
+
+        <div id="entry-yazma-alani" style="display: none; margin-top: 40px; padding-top: 20px; border-top: 2px dashed var(--border);">
+            <h3>Senin Fikrin Ne?</h3>
+            <div class="md-toolbar">
+                <button class="md-btn" onclick="insertMD('**', '**')" title="Kalın"><b>B</b></button>
+                <button class="md-btn" onclick="insertMD('*', '*')" title="İtalik"><i>I</i></button>
+                <button class="md-btn" onclick="insertMD('`', '`')" title="Satır İçi Kod">&lt;/&gt;</button>
+                <button class="md-btn" onclick="insertMD('\n```\n', '\n```\n')" title="Kod Bloğu">📝 Kod Bloğu</button>
+            </div>
+            <textarea id="yeniCevapMetni" rows="5" placeholder="Bu başlığa profesyonel bir entry gir..."></textarea>
+            <button class="btn-primary" style="width: auto; float: right;" onclick="cevapYaz()">Entry Gönder</button>
+            <div style="clear: both;"></div>
         </div>
     </div>
 </div>
@@ -87,11 +153,51 @@
     let seciliBaslikId = null;
     let mevcutSayfa = 0;
 
+    // --- TEMA (DARK MODE) YÖNETİMİ ---
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('theme-toggle').innerText = isDark ? '☀️' : '🌙';
+    }
+    // Sayfa açıldığında hafızadaki temayı yükle
+    if(localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-toggle').innerText = '☀️';
+    }
+
+    // --- MARKDOWN FORMATLAYICI ---
+    function insertMD(startTag, endTag) {
+        const textarea = document.getElementById('yeniCevapMetni');
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        textarea.value = text.substring(0, start) + startTag + text.substring(start, end) + endTag + text.substring(end);
+        textarea.focus();
+        textarea.selectionStart = start + startTag.length;
+        textarea.selectionEnd = end + startTag.length;
+    }
+
+    function parseMarkdown(text) {
+        if(!text) return "";
+        // Güvenlik: HTML taglerini etkisizleştir (XSS Koruması)
+        text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        // Markdown dönüşümleri
+        text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>'); // Çoklu satır kod
+        text = text.replace(/`([^`]+)`/g, '<code>$1</code>'); // Tek satır kod
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'); // Kalın
+        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>'); // İtalik
+        return text;
+    }
+
+    // --- API İŞLEMLERİ ---
     async function kayitOl() {
         const ad = document.getElementById('kullaniciAdi').value;
         const sifre = document.getElementById('sifre').value;
         const response = await fetch('/api/kullanici/kayit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kullaniciAdi: ad, sifreHash: sifre }) });
-        document.getElementById('mesaj-kutusu').innerText = await response.text();
+        const msjKutu = document.getElementById('mesaj-kutusu');
+        msjKutu.innerText = await response.text();
+        msjKutu.style.color = response.ok ? 'green' : 'red';
     }
 
     async function girisYap() {
@@ -100,50 +206,53 @@
         const response = await fetch('/api/kullanici/giris', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kullaniciAdi: ad, sifreHash: sifre }) });
 
         if (response.ok) {
-            const kullaniciVerisi = await response.json(); // Artık backend'den JSON geliyor
+            const kullaniciVerisi = await response.json();
             aktifKullaniciId = kullaniciVerisi.id; 
             aktifKullaniciRol = kullaniciVerisi.rol;
             
-            document.getElementById('aktif-kullanici-adi').innerText = 'Hoş geldin, ' + kullaniciVerisi.kullaniciAdi;
-            document.getElementById('kullanici-paneli').style.display = 'block';
+            document.getElementById('aktif-kullanici-adi').innerText = '👋 Hoş geldin, ' + kullaniciVerisi.kullaniciAdi;
+            document.getElementById('kullanici-paneli').style.display = 'flex';
             document.getElementById('auth-bolumu').style.display = 'none';
             document.getElementById('baslik-acma-bolumu').style.display = 'block';
             
-            // Eğer detay sayfasındaysa yazar alanını ve admin butonlarını kontrol et
             if(document.getElementById('baslik-detay-bolumu').style.display === 'block') {
                 baslikDetayGoster(seciliBaslikId, document.getElementById('secili-baslik-adi').innerText, mevcutSayfa);
             }
         } else {
-            document.getElementById('mesaj-kutusu').style.color = 'red';
-            document.getElementById('mesaj-kutusu').innerText = await response.text();
+            const msjKutu = document.getElementById('mesaj-kutusu');
+            msjKutu.style.color = 'red';
+            msjKutu.innerText = await response.text();
         }
     }
 
     function cikisYap() {
-        aktifKullaniciId = null;
-        aktifKullaniciRol = null;
+        aktifKullaniciId = null; aktifKullaniciRol = null;
         document.getElementById('kullanici-paneli').style.display = 'none';
         document.getElementById('auth-bolumu').style.display = 'block';
         document.getElementById('baslik-acma-bolumu').style.display = 'none';
         document.getElementById('entry-yazma-alani').style.display = 'none';
         document.getElementById('btn-baslik-sil').style.display = 'none';
-        document.getElementById('kullaniciAdi').value = '';
-        document.getElementById('sifre').value = '';
+        document.getElementById('kullaniciAdi').value = ''; document.getElementById('sifre').value = '';
         document.getElementById('mesaj-kutusu').innerText = '';
         anaSayfayaDon();
     }
 
     async function baslikAc() {
         const baslikAd = document.getElementById('yeniBaslikAd').value;
+        if(!baslikAd.trim()) return alert("Başlık adı boş olamaz!");
         const response = await fetch(`/api/baslik/olustur?kullaniciId=${aktifKullaniciId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ad: baslikAd }) });
         if (response.ok) { document.getElementById('yeniBaslikAd').value = ''; basliklariGetir(); } else { alert(await response.text()); }
     }
 
     async function basliklariGetir() {
         const kelime = document.getElementById('aramaKelimesi').value;
+        const liste = document.getElementById('baslik-listesi');
+        
+        // SKELETON LOADER (Veri gelmeden önce)
+        liste.innerHTML = `<li class="skeleton skel-title"></li><li class="skeleton skel-title" style="width:50%"></li><li class="skeleton skel-title" style="width:80%"></li>`;
+
         const response = await fetch(`/api/baslik/ara?kelime=${kelime}`);
         const basliklar = await response.json();
-        const liste = document.getElementById('baslik-listesi');
         liste.innerHTML = ''; 
 
         basliklar.forEach(b => {
@@ -155,48 +264,51 @@
     }
 
     async function baslikDetayGoster(id, ad, sayfa = 0) {
-        seciliBaslikId = id;
-        mevcutSayfa = sayfa;
+        seciliBaslikId = id; mevcutSayfa = sayfa;
         document.getElementById('secili-baslik-adi').innerText = ad;
         document.getElementById('baslik-acma-bolumu').style.display = 'none';
         document.getElementById('baslik-listeleme-bolumu').style.display = 'none';
         document.getElementById('baslik-detay-bolumu').style.display = 'block';
+        document.getElementById('btn-baslik-sil').style.display = (aktifKullaniciId !== null && aktifKullaniciRol === 'ADMIN') ? 'block' : 'none'; 
+        document.getElementById('entry-yazma-alani').style.display = (aktifKullaniciId !== null) ? 'block' : 'none';
 
-        if(aktifKullaniciId !== null) {
-            document.getElementById('entry-yazma-alani').style.display = 'block';
-            // Sadece ADMIN rolü varsa başlık silme butonunu göster
-            document.getElementById('btn-baslik-sil').style.display = (aktifKullaniciRol === 'ADMIN') ? 'block' : 'none'; 
-        } else {
-            document.getElementById('btn-baslik-sil').style.display = 'none';
-        }
+        const liste = document.getElementById('cevap-listesi');
+        
+        // SKELETON LOADER
+        liste.innerHTML = `
+            <li class="entry-kutu"><div class="skeleton skel-text"></div><div class="skeleton skel-text" style="width:60%"></div></li>
+            <li class="entry-kutu"><div class="skeleton skel-text"></div><div class="skeleton skel-text" style="width:40%"></div></li>
+        `;
 
         const response = await fetch(`/api/cevap/baslik/${id}?sayfa=${sayfa}`);
         const sayfaVerisi = await response.json(); 
         const cevaplar = sayfaVerisi.content; 
-        const toplamSayfa = sayfaVerisi.totalPages;
-
-        const liste = document.getElementById('cevap-listesi');
+        
         liste.innerHTML = '';
-
         if(cevaplar.length === 0) {
-            liste.innerHTML = '<li class="entry-kutu"><em style="color: #6c757d;">Bu başlığa henüz entry girilmemiş. İlk sen yaz!</em></li>';
+            liste.innerHTML = '<li class="entry-kutu"><em style="color: var(--gray);">Bu başlığa henüz entry girilmemiş. İlk sen yaz!</em></li>';
         } else {
             cevaplar.forEach(c => {
                 const li = document.createElement('li');
                 li.className = 'entry-kutu';
-                const tarih = new Date(c.yazilmaTarihi).toLocaleString('tr-TR');
+                const tarih = new Date(c.yazilmaTarihi).toLocaleString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
                 
-                let silButonuHTML = '';
-                // Sadece ADMIN rolü varsa entry silme butonunu göster
-                if(aktifKullaniciRol === 'ADMIN') {
-                    silButonuHTML = `<button class="btn-sil" onclick="cevapSil(${c.id})">Sil</button>`;
-                }
+                // Markdown uygulanmış metni al
+                const formatliMetin = parseMarkdown(c.metin);
 
-                li.innerHTML = `<p style="margin: 0;">${c.metin}</p><div class="entry-yazar">${silButonuHTML} - ${c.yazar.kullaniciAdi} | ${tarih}</div>`;
+                let silButonuHTML = (aktifKullaniciRol === 'ADMIN') ? `<button class="btn-danger" style="padding: 4px 8px; font-size: 0.8em;" onclick="cevapSil(${c.id})">Sil</button>` : '';
+
+                li.innerHTML = `
+                    <div class="entry-metin">${formatliMetin}</div>
+                    <div class="entry-alt-bilgi">
+                        ${silButonuHTML}
+                        <span><span class="yazar-badge">@${c.yazar.kullaniciAdi}</span> • ${tarih}</span>
+                    </div>
+                `;
                 liste.appendChild(li);
             });
         }
-        cizSayfalamaButonlari(ad, toplamSayfa);
+        cizSayfalamaButonlari(ad, sayfaVerisi.totalPages);
     }
 
     function cizSayfalamaButonlari(baslikAd, toplamSayfa) {
@@ -204,14 +316,15 @@
         alan.innerHTML = '';
         if (toplamSayfa > 1) {
             const guvenliAd = baslikAd.replace(/'/g, "\\'");
-            if (mevcutSayfa > 0) alan.innerHTML += `<button class="btn-sayfa" onclick="baslikDetayGoster(${seciliBaslikId}, '${guvenliAd}', ${mevcutSayfa - 1})">⬅ Önceki</button>`;
-            alan.innerHTML += `<span style="font-weight: bold;">Sayfa ${mevcutSayfa + 1} / ${toplamSayfa}</span>`;
-            if (mevcutSayfa < toplamSayfa - 1) alan.innerHTML += `<button class="btn-sayfa" onclick="baslikDetayGoster(${seciliBaslikId}, '${guvenliAd}', ${mevcutSayfa + 1})">Sonraki ➡</button>`;
+            if (mevcutSayfa > 0) alan.innerHTML += `<button class="btn-sayfa" onclick="baslikDetayGoster(${seciliBaslikId}, '${guvenliAd}', ${mevcutSayfa - 1})">← Önceki Sayfa</button>`;
+            alan.innerHTML += `<span style="font-weight: 600; color: var(--gray);">Sayfa ${mevcutSayfa + 1} / ${toplamSayfa}</span>`;
+            if (mevcutSayfa < toplamSayfa - 1) alan.innerHTML += `<button class="btn-sayfa" onclick="baslikDetayGoster(${seciliBaslikId}, '${guvenliAd}', ${mevcutSayfa + 1})">Sonraki Sayfa →</button>`;
         }
     }
 
     async function cevapYaz() {
         const metin = document.getElementById('yeniCevapMetni').value;
+        if(!metin.trim()) return alert("Entry boş olamaz!");
         const response = await fetch(`/api/cevap/yaz?baslikId=${seciliBaslikId}&kullaniciId=${aktifKullaniciId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ metin: metin }) });
         if (response.ok) { document.getElementById('yeniCevapMetni').value = ''; baslikDetayGoster(seciliBaslikId, document.getElementById('secili-baslik-adi').innerText, mevcutSayfa); } else { alert(await response.text()); }
     }
