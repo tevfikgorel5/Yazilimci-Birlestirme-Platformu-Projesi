@@ -207,12 +207,13 @@
         const response = await fetch('/api/kullanici/giris', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kullaniciAdi: ad, sifreHash: sifre }) });
 
         if (response.ok) {
-            // ÇÖZÜM 1: Backend bize JSON değil sadece düz metin (ID) döndüğü için artık düz metin olarak okuyoruz.
-            aktifKullaniciId = await response.text(); 
-            aktifKullaniciRol = 'USER'; // Backend rol dönmediği için varsayılan atadık
+            // ÇÖZÜM: Backend artık JSON paketi (nesne) dönüyor. Biz de içinden ID'yi ve Adı alıyoruz.
+            const kullaniciVerisi = await response.json(); 
+            aktifKullaniciId = kullaniciVerisi.id; 
+            aktifKullaniciRol = kullaniciVerisi.rol || 'USER'; 
             
-            // "undefined" yazmasını önlemek için sadece şık bir selamlama gösteriyoruz.
-            document.getElementById('aktif-kullanici-adi').innerText = '👋 Hoş geldin!';
+            // Hoş geldin yazısına kullanıcının adını da tekrar ekleyelim, şık dursun!
+            document.getElementById('aktif-kullanici-adi').innerText = '👋 Hoş geldin, ' + kullaniciVerisi.kullaniciAdi;
             document.getElementById('kullanici-paneli').style.display = 'flex';
             document.getElementById('auth-bolumu').style.display = 'none';
             document.getElementById('baslik-acma-bolumu').style.display = 'block';

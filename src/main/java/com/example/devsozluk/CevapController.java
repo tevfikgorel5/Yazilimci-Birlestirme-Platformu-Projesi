@@ -15,28 +15,37 @@ public class CevapController {
     @Autowired private BaslikRepository baslikRepository;
     @Autowired private KullaniciRepository kullaniciRepository;
 
+    // GÜNCELLENEN KISIM: Gelen ID'leri int yerine String alıp, boşluklarını temizleyip içeride güvenle çeviriyoruz.
     @PostMapping("/yaz")
-    public ResponseEntity<String> cevapYaz(@RequestParam int baslikId, @RequestParam int kullaniciId, @RequestBody Cevap cevap) {
-        Optional<Baslik> baslikOpt = baslikRepository.findById(baslikId);
-        Optional<Kullanici> yazarOpt = kullaniciRepository.findById(kullaniciId);
+    public ResponseEntity<String> cevapYaz(@RequestParam String baslikId, @RequestParam String kullaniciId, @RequestBody Cevap cevap) {
+        try {
+            int bId = Integer.parseInt(baslikId.trim());
+            int kId = Integer.parseInt(kullaniciId.trim());
 
-        if (baslikOpt.isPresent() && yazarOpt.isPresent()) {
-            if(cevap.getMetin() == null || cevap.getMetin().trim().isEmpty()) return ResponseEntity.badRequest().body("Metin boş olamaz!");
-            cevap.setBaslik(baslikOpt.get());
-            cevap.setYazar(yazarOpt.get());
-            cevapRepository.save(cevap);
-            return ResponseEntity.ok("Entry eklendi.");
+            Optional<Baslik> baslikOpt = baslikRepository.findById(bId);
+            Optional<Kullanici> yazarOpt = kullaniciRepository.findById(kId);
+
+            if (baslikOpt.isPresent() && yazarOpt.isPresent()) {
+                if(cevap.getMetin() == null || cevap.getMetin().trim().isEmpty()) {
+                    return ResponseEntity.badRequest().body("Metin boş olamaz!");
+                }
+                cevap.setBaslik(baslikOpt.get());
+                cevap.setYazar(yazarOpt.get());
+                cevapRepository.save(cevap);
+                return ResponseEntity.ok("Entry eklendi.");
+            }
+            return ResponseEntity.badRequest().body("Başlık veya Kullanıcı bulunamadı!");
+        } catch (NumberFormatException e) {
+            // Artık gizli 400 hatası yerine sorunun nereden kaynaklandığını açıkça göreceğiz.
+            return ResponseEntity.badRequest().body("HATA: ID'ler bozuk geldi! Başlık: [" + baslikId + "], Kullanıcı: [" + kullaniciId + "]");
         }
-        return ResponseEntity.badRequest().body("Başlık veya Kullanıcı bulunamadı!");
     }
 
-    // GÜNCELLEME: Repository'e az önce eklediğimiz "Beğeniye Göre Sırala" metodunu List olarak çağırıyoruz
     @GetMapping("/baslik/{baslikId}")
     public ResponseEntity<List<Cevap>> cevaplariGetir(@PathVariable int baslikId) {
         return ResponseEntity.ok(cevapRepository.findByBaslikIdOrderByBegeniSayisiDesc(baslikId));
     }
 
-    // YENİ EKLENEN METOT: Beğeni artırma işlemi
     @PostMapping("/begen/{cevapId}")
     public ResponseEntity<String> cevapBegen(@PathVariable int cevapId) {
         Optional<Cevap> cevapOpt = cevapRepository.findById(cevapId);
@@ -44,7 +53,6 @@ public class CevapController {
             Cevap cevap = cevapOpt.get();
             cevap.setBegeniSayisi(cevap.getBegeniSayisi() + 1);
             cevapRepository.save(cevap);
-            // Başarılı olursa yeni beğeni sayısını geri dönüyoruz ki ekranda anında güncelleyelim
             return ResponseEntity.ok(String.valueOf(cevap.getBegeniSayisi()));
         }
         return ResponseEntity.status(404).body("Entry bulunamadı!");
