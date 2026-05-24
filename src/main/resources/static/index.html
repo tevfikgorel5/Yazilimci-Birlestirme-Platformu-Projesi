@@ -6,10 +6,10 @@
     <title>DevSözlük | Yazılımcı Birleştirme Platformu</title>
     <style>
         /* Modern Reset ve Değişkenler (Açık Tema) */
-        :root { --primary: #2563eb; --primary-hover: #1d4ed8; --danger: #ef4444; --danger-hover: #b91c1c; --dark: #1e293b; --light: #f8fafc; --gray: #64748b; --border: #e2e8f0; --bg: #f1f5f9; --card-bg: #ffffff; --text: #334155; }
+        :root { --primary: #2563eb; --primary-hover: #1d4ed8; --danger: #ef4444; --danger-hover: #b91c1c; --dark: #1e293b; --light: #f8fafc; --gray: #64748b; --border: #e2e8f0; --bg: #f1f5f9; --card-bg: #ffffff; --text: #334155; --success: #10b981; }
         
         /* Gece Modu Değişkenleri (Dark Mode) */
-        body.dark-mode { --primary: #3b82f6; --primary-hover: #60a5fa; --danger: #ef4444; --danger-hover: #f87171; --dark: #f8fafc; --light: #1e293b; --gray: #94a3b8; --border: #334155; --bg: #0f172a; --card-bg: #1e293b; --text: #cbd5e1; }
+        body.dark-mode { --primary: #3b82f6; --primary-hover: #60a5fa; --danger: #ef4444; --danger-hover: #f87171; --dark: #f8fafc; --light: #1e293b; --gray: #94a3b8; --border: #334155; --bg: #0f172a; --card-bg: #1e293b; --text: #cbd5e1; --success: #34d399;}
 
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.6; transition: background-color 0.3s, color 0.3s; }
         
@@ -43,6 +43,10 @@
         .btn-sayfa { background-color: var(--card-bg); border: 1px solid var(--border); color: var(--dark); padding: 8px 16px; border-radius: 6px; }
         .btn-sayfa:hover { background-color: var(--light); border-color: var(--gray); }
         
+        /* YENİ: Beğeni Butonu */
+        .btn-begen { background-color: transparent; border: 1px solid var(--success); color: var(--success); padding: 4px 10px; font-size: 0.85em; border-radius: 20px; cursor: pointer; transition: 0.2s; }
+        .btn-begen:hover { background-color: var(--success); color: white; }
+
         /* Başlık Listesi */
         #baslik-listesi { list-style-type: none; padding: 0; margin: 0; }
         #baslik-listesi li { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); transition: 0.2s; }
@@ -160,7 +164,6 @@
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         document.getElementById('theme-toggle').innerText = isDark ? '☀️' : '🌙';
     }
-    // Sayfa açıldığında hafızadaki temayı yükle
     if(localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
         document.getElementById('theme-toggle').innerText = '☀️';
@@ -180,13 +183,11 @@
 
     function parseMarkdown(text) {
         if(!text) return "";
-        // Güvenlik: HTML taglerini etkisizleştir (XSS Koruması)
         text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        // Markdown dönüşümleri
-        text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>'); // Çoklu satır kod
-        text = text.replace(/`([^`]+)`/g, '<code>$1</code>'); // Tek satır kod
-        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'); // Kalın
-        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>'); // İtalik
+        text = text.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>'); 
+        text = text.replace(/`([^`]+)`/g, '<code>$1</code>'); 
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'); 
+        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>'); 
         return text;
     }
 
@@ -206,11 +207,12 @@
         const response = await fetch('/api/kullanici/giris', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kullaniciAdi: ad, sifreHash: sifre }) });
 
         if (response.ok) {
-            const kullaniciVerisi = await response.json();
-            aktifKullaniciId = kullaniciVerisi.id; 
-            aktifKullaniciRol = kullaniciVerisi.rol;
+            // ÇÖZÜM 1: Backend bize JSON değil sadece düz metin (ID) döndüğü için artık düz metin olarak okuyoruz.
+            aktifKullaniciId = await response.text(); 
+            aktifKullaniciRol = 'USER'; // Backend rol dönmediği için varsayılan atadık
             
-            document.getElementById('aktif-kullanici-adi').innerText = '👋 Hoş geldin, ' + kullaniciVerisi.kullaniciAdi;
+            // "undefined" yazmasını önlemek için sadece şık bir selamlama gösteriyoruz.
+            document.getElementById('aktif-kullanici-adi').innerText = '👋 Hoş geldin!';
             document.getElementById('kullanici-paneli').style.display = 'flex';
             document.getElementById('auth-bolumu').style.display = 'none';
             document.getElementById('baslik-acma-bolumu').style.display = 'block';
@@ -248,7 +250,6 @@
         const kelime = document.getElementById('aramaKelimesi').value;
         const liste = document.getElementById('baslik-listesi');
         
-        // SKELETON LOADER (Veri gelmeden önce)
         liste.innerHTML = `<li class="skeleton skel-title"></li><li class="skeleton skel-title" style="width:50%"></li><li class="skeleton skel-title" style="width:80%"></li>`;
 
         const response = await fetch(`/api/baslik/ara?kelime=${kelime}`);
@@ -273,42 +274,69 @@
         document.getElementById('entry-yazma-alani').style.display = (aktifKullaniciId !== null) ? 'block' : 'none';
 
         const liste = document.getElementById('cevap-listesi');
-        
-        // SKELETON LOADER
         liste.innerHTML = `
             <li class="entry-kutu"><div class="skeleton skel-text"></div><div class="skeleton skel-text" style="width:60%"></div></li>
-            <li class="entry-kutu"><div class="skeleton skel-text"></div><div class="skeleton skel-text" style="width:40%"></div></li>
         `;
 
-        const response = await fetch(`/api/cevap/baslik/${id}?sayfa=${sayfa}`);
-        const sayfaVerisi = await response.json(); 
-        const cevaplar = sayfaVerisi.content; 
-        
-        liste.innerHTML = '';
-        if(cevaplar.length === 0) {
-            liste.innerHTML = '<li class="entry-kutu"><em style="color: var(--gray);">Bu başlığa henüz entry girilmemiş. İlk sen yaz!</em></li>';
-        } else {
-            cevaplar.forEach(c => {
-                const li = document.createElement('li');
-                li.className = 'entry-kutu';
-                const tarih = new Date(c.yazilmaTarihi).toLocaleString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
-                
-                // Markdown uygulanmış metni al
-                const formatliMetin = parseMarkdown(c.metin);
+        try {
+            const response = await fetch(`/api/cevap/baslik/${id}?sayfa=${sayfa}`);
+            const sayfaVerisi = await response.json(); 
+            
+            const cevaplar = Array.isArray(sayfaVerisi) ? sayfaVerisi : (sayfaVerisi.content || []); 
+            const toplamSayfa = sayfaVerisi.totalPages || 0;
+            
+            liste.innerHTML = '';
+            
+            if(cevaplar.length === 0) {
+                liste.innerHTML = '<li class="entry-kutu" style="text-align: center; padding: 40px 0;"><em style="color: var(--gray); font-size: 1.1em;">Bu başlığa henüz entry girilmemiş. İlk sen yaz!</em></li>';
+            } else {
+                cevaplar.forEach(c => {
+                    // ÇÖZÜM 2: Veritabanındaki bozuk satırların (eski silinmiş kullanıcılar vb.) JavaScript'i çökertmesini engelliyoruz.
+                    try {
+                        const li = document.createElement('li');
+                        li.className = 'entry-kutu';
+                        const tarih = new Date(c.yazilmaTarihi).toLocaleString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+                        const formatliMetin = parseMarkdown(c.metin);
+                        
+                        const begeniSayisi = c.begeniSayisi || 0;
+                        let begenButonuHTML = `<button class="btn-begen" onclick="cevapBegen(${c.id})" title="Bu entry'i beğen">👍 <span id="begeni-sayac-${c.id}">${begeniSayisi}</span></button>`;
+                        let silButonuHTML = (aktifKullaniciRol === 'ADMIN') ? `<button class="btn-danger" style="padding: 4px 8px; font-size: 0.8em;" onclick="cevapSil(${c.id})">Sil</button>` : '';
+                        
+                        // Eğer yazar bilgisi null gelirse kod çöker. ?. operatörü ile bunu güvenli hale getirdik.
+                        const yazarAdi = c.yazar?.kullaniciAdi || 'Gizli Yazar';
 
-                let silButonuHTML = (aktifKullaniciRol === 'ADMIN') ? `<button class="btn-danger" style="padding: 4px 8px; font-size: 0.8em;" onclick="cevapSil(${c.id})">Sil</button>` : '';
-
-                li.innerHTML = `
-                    <div class="entry-metin">${formatliMetin}</div>
-                    <div class="entry-alt-bilgi">
-                        ${silButonuHTML}
-                        <span><span class="yazar-badge">@${c.yazar.kullaniciAdi}</span> • ${tarih}</span>
-                    </div>
-                `;
-                liste.appendChild(li);
-            });
+                        li.innerHTML = `
+                            <div class="entry-metin">${formatliMetin}</div>
+                            <div class="entry-alt-bilgi">
+                                ${begenButonuHTML}
+                                ${silButonuHTML}
+                                <span><span class="yazar-badge">@${yazarAdi}</span> • ${tarih}</span>
+                            </div>
+                        `;
+                        liste.appendChild(li);
+                    } catch (err) {
+                        console.error("Entry yüklenemedi:", err);
+                    }
+                });
+            }
+            cizSayfalamaButonlari(ad, toplamSayfa);
+        } catch(error) {
+            liste.innerHTML = '<li class="entry-kutu"><em style="color: red;">Entryler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.</em></li>';
         }
-        cizSayfalamaButonlari(ad, sayfaVerisi.totalPages);
+    }
+
+    async function cevapBegen(cevapId) {
+        if(aktifKullaniciId === null) {
+            alert("Beğenmek için giriş yapmalısın!");
+            return;
+        }
+        const response = await fetch(`/api/cevap/begen/${cevapId}`, { method: 'POST' });
+        if(response.ok) {
+            const yeniBegeniSayisi = await response.text();
+            document.getElementById(`begeni-sayac-${cevapId}`).innerText = yeniBegeniSayisi;
+        } else {
+            console.error("Beğeni işlemi başarısız.");
+        }
     }
 
     function cizSayfalamaButonlari(baslikAd, toplamSayfa) {
@@ -325,8 +353,15 @@
     async function cevapYaz() {
         const metin = document.getElementById('yeniCevapMetni').value;
         if(!metin.trim()) return alert("Entry boş olamaz!");
+        
         const response = await fetch(`/api/cevap/yaz?baslikId=${seciliBaslikId}&kullaniciId=${aktifKullaniciId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ metin: metin }) });
-        if (response.ok) { document.getElementById('yeniCevapMetni').value = ''; baslikDetayGoster(seciliBaslikId, document.getElementById('secili-baslik-adi').innerText, mevcutSayfa); } else { alert(await response.text()); }
+        
+        if (response.ok) { 
+            document.getElementById('yeniCevapMetni').value = ''; 
+            baslikDetayGoster(seciliBaslikId, document.getElementById('secili-baslik-adi').innerText, mevcutSayfa); 
+        } else { 
+            alert(await response.text()); 
+        }
     }
 
     async function baslikSil() {

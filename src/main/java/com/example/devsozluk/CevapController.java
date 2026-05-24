@@ -1,13 +1,10 @@
 package com.example.devsozluk;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -33,12 +30,24 @@ public class CevapController {
         return ResponseEntity.badRequest().body("Başlık veya Kullanıcı bulunamadı!");
     }
 
-    // UC12: Sayfalama (Pagination) mantığı eklendi
+    // GÜNCELLEME: Repository'e az önce eklediğimiz "Beğeniye Göre Sırala" metodunu List olarak çağırıyoruz
     @GetMapping("/baslik/{baslikId}")
-    public ResponseEntity<Page<Cevap>> cevaplariGetir(@PathVariable int baslikId, @RequestParam(defaultValue = "0") int sayfa) {
-        // Her sayfada 5 entry gösterilecek ve yazılma tarihine göre eskiden yeniye sıralanacak
-        Pageable sayfalama = PageRequest.of(sayfa, 5, Sort.by("yazilmaTarihi").ascending());
-        return ResponseEntity.ok(cevapRepository.findByBaslikId(baslikId, sayfalama));
+    public ResponseEntity<List<Cevap>> cevaplariGetir(@PathVariable int baslikId) {
+        return ResponseEntity.ok(cevapRepository.findByBaslikIdOrderByBegeniSayisiDesc(baslikId));
+    }
+
+    // YENİ EKLENEN METOT: Beğeni artırma işlemi
+    @PostMapping("/begen/{cevapId}")
+    public ResponseEntity<String> cevapBegen(@PathVariable int cevapId) {
+        Optional<Cevap> cevapOpt = cevapRepository.findById(cevapId);
+        if (cevapOpt.isPresent()) {
+            Cevap cevap = cevapOpt.get();
+            cevap.setBegeniSayisi(cevap.getBegeniSayisi() + 1);
+            cevapRepository.save(cevap);
+            // Başarılı olursa yeni beğeni sayısını geri dönüyoruz ki ekranda anında güncelleyelim
+            return ResponseEntity.ok(String.valueOf(cevap.getBegeniSayisi()));
+        }
+        return ResponseEntity.status(404).body("Entry bulunamadı!");
     }
 
     @DeleteMapping("/sil/{cevapId}")
